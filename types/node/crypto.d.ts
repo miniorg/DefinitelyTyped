@@ -409,47 +409,11 @@ declare module "crypto" {
 
     interface BasePrivateKeyEncodingOptions<T extends KeyFormat> {
         format: T;
-        cipher: string;
-        passphrase: string;
+        cipher?: string;
+        passphrase?: string | Buffer;
     }
 
-    interface KeyPairKeyObjectResult {
-        publicKey: KeyObject;
-        privateKey: KeyObject;
-    }
-
-    interface ECKeyPairKeyObjectOptions {
-        /**
-         * Name of the curve to use.
-         */
-        namedCurve: string;
-    }
-
-    interface RSAKeyPairKeyObjectOptions {
-        /**
-         * Key size in bits
-         */
-        modulusLength: number;
-
-        /**
-         * @default 0x10001
-         */
-        publicExponent?: number;
-    }
-
-    interface DSAKeyPairKeyObjectOptions {
-        /**
-         * Key size in bits
-         */
-        modulusLength: number;
-
-        /**
-         * Size of q in bits
-         */
-        divisorLength: number;
-    }
-
-    interface RSAKeyPairOptions<PubF extends KeyFormat, PrivF extends KeyFormat> {
+    interface RSAKeyPairOptions {
         /**
          * Key size in bits
          */
@@ -458,17 +422,22 @@ declare module "crypto" {
          * @default 0x10001
          */
         publicExponent?: number;
+    }
 
+    interface RSAKeyPairOptionsEncodingPublicKey<PubF extends KeyFormat> extends RSAKeyPairOptions {
         publicKeyEncoding: {
             type: 'pkcs1' | 'spki';
             format: PubF;
         };
+    }
+
+    interface RSAKeyPairOptionsEncodingPrivateKey<PrivF extends KeyFormat> extends RSAKeyPairOptions {
         privateKeyEncoding: BasePrivateKeyEncodingOptions<PrivF> & {
             type: 'pkcs1' | 'pkcs8';
         };
     }
 
-    interface DSAKeyPairOptions<PubF extends KeyFormat, PrivF extends KeyFormat> {
+    interface DSAKeyPairOptions {
         /**
          * Key size in bits
          */
@@ -477,89 +446,135 @@ declare module "crypto" {
          * Size of q in bits
          */
         divisorLength: number;
+    }
 
+    interface DSAKeyPairOptionsEncodingPublicKey<PubF extends KeyFormat> extends DSAKeyPairOptions {
         publicKeyEncoding: {
             type: 'spki';
             format: PubF;
         };
+    }
+
+    interface DSAKeyPairOptionsEncodingPrivateKey<PrivF extends KeyFormat> extends DSAKeyPairOptions {
         privateKeyEncoding: BasePrivateKeyEncodingOptions<PrivF> & {
             type: 'pkcs8';
         };
     }
 
-    interface ECKeyPairOptions<PubF extends KeyFormat, PrivF extends KeyFormat> {
+    interface ECKeyPairOptions {
         /**
          * Name of the curve to use.
          */
         namedCurve: string;
+    }
 
+    interface ECKeyPairOptionsEncodingPublicKey<PubF extends KeyFormat> extends ECKeyPairOptions {
         publicKeyEncoding: {
             type: 'pkcs1' | 'spki';
             format: PubF;
         };
+    }
+
+    interface ECKeyPairOptionsEncodingPrivateKey<PrivF extends KeyFormat> extends ECKeyPairOptions {
         privateKeyEncoding: BasePrivateKeyEncodingOptions<PrivF> & {
             type: 'sec1' | 'pkcs8';
         };
     }
 
-    interface KeyPairSyncResult<T1 extends string | Buffer, T2 extends string | Buffer> {
+    interface KeyPairSyncResult<T1 extends string | Buffer | KeyObject, T2 extends string | Buffer | KeyObject> {
         publicKey: T1;
         privateKey: T2;
     }
 
-    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptions<'pem', 'pem'>): KeyPairSyncResult<string, string>;
-    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptions<'pem', 'der'>): KeyPairSyncResult<string, Buffer>;
-    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptions<'der', 'pem'>): KeyPairSyncResult<Buffer, string>;
-    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptions<'der', 'der'>): KeyPairSyncResult<Buffer, Buffer>;
-    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairKeyObjectOptions): KeyPairKeyObjectResult;
+    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'pem'> & RSAKeyPairOptionsEncodingPrivateKey<'pem'>): KeyPairSyncResult<string, string>;
+    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'pem'> & RSAKeyPairOptionsEncodingPrivateKey<'der'>): KeyPairSyncResult<string, Buffer>;
+    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'pem'>): KeyPairSyncResult<string, KeyObject>;
+    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'der'> & RSAKeyPairOptionsEncodingPrivateKey<'pem'>): KeyPairSyncResult<Buffer, string>;
+    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'der'> & RSAKeyPairOptionsEncodingPrivateKey<'der'>): KeyPairSyncResult<Buffer, Buffer>;
+    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'der'>): KeyPairSyncResult<Buffer, KeyObject>;
+    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptionsEncodingPrivateKey<'pem'>): KeyPairSyncResult<KeyObject, string>;
+    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptionsEncodingPrivateKey<'der'>): KeyPairSyncResult<KeyObject, Buffer>;
+    function generateKeyPairSync(type: 'rsa', options: RSAKeyPairOptions): KeyPairSyncResult<KeyObject, KeyObject>;
 
-    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptions<'pem', 'pem'>): KeyPairSyncResult<string, string>;
-    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptions<'pem', 'der'>): KeyPairSyncResult<string, Buffer>;
-    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptions<'der', 'pem'>): KeyPairSyncResult<Buffer, string>;
-    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptions<'der', 'der'>): KeyPairSyncResult<Buffer, Buffer>;
-    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairKeyObjectOptions): KeyPairKeyObjectResult;
+    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'pem'> & DSAKeyPairOptionsEncodingPrivateKey<'pem'>): KeyPairSyncResult<string, string>;
+    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'pem'> & DSAKeyPairOptionsEncodingPrivateKey<'der'>): KeyPairSyncResult<string, Buffer>;
+    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'pem'>): KeyPairSyncResult<string, KeyObject>;
+    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'der'> & DSAKeyPairOptionsEncodingPrivateKey<'pem'>): KeyPairSyncResult<Buffer, string>;
+    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'der'> & DSAKeyPairOptionsEncodingPrivateKey<'der'>): KeyPairSyncResult<Buffer, Buffer>;
+    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'der'>): KeyPairSyncResult<Buffer, KeyObject>;
+    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptionsEncodingPrivateKey<'pem'>): KeyPairSyncResult<KeyObject, string>;
+    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptionsEncodingPrivateKey<'der'>): KeyPairSyncResult<KeyObject, Buffer>;
+    function generateKeyPairSync(type: 'dsa', options: DSAKeyPairOptions): KeyPairSyncResult<KeyObject, KeyObject>;
 
-    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptions<'pem', 'pem'>): KeyPairSyncResult<string, string>;
-    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptions<'pem', 'der'>): KeyPairSyncResult<string, Buffer>;
-    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptions<'der', 'pem'>): KeyPairSyncResult<Buffer, string>;
-    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptions<'der', 'der'>): KeyPairSyncResult<Buffer, Buffer>;
-    function generateKeyPairSync(type: 'ec', options: ECKeyPairKeyObjectOptions): KeyPairKeyObjectResult;
+    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'pem'> & ECKeyPairOptionsEncodingPrivateKey<'pem'>): KeyPairSyncResult<string, string>;
+    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'pem'> & ECKeyPairOptionsEncodingPrivateKey<'der'>): KeyPairSyncResult<string, Buffer>;
+    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'pem'>): KeyPairSyncResult<string, KeyObject>;
+    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'der'> & ECKeyPairOptionsEncodingPrivateKey<'pem'>): KeyPairSyncResult<Buffer, string>;
+    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'der'> & ECKeyPairOptionsEncodingPrivateKey<'der'>): KeyPairSyncResult<Buffer, Buffer>;
+    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'der'>): KeyPairSyncResult<Buffer, KeyObject>;
+    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptionsEncodingPrivateKey<'pem'>): KeyPairSyncResult<KeyObject, string>;
+    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptionsEncodingPrivateKey<'der'>): KeyPairSyncResult<KeyObject, Buffer>;
+    function generateKeyPairSync(type: 'ec', options: ECKeyPairOptions): KeyPairSyncResult<KeyObject, KeyObject>;
 
-    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptions<'pem', 'pem'>, callback: (err: Error | null, publicKey: string, privateKey: string) => void): void;
-    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptions<'pem', 'der'>, callback: (err: Error | null, publicKey: string, privateKey: Buffer) => void): void;
-    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptions<'der', 'pem'>, callback: (err: Error | null, publicKey: Buffer, privateKey: string) => void): void;
-    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptions<'der', 'der'>, callback: (err: Error | null, publicKey: Buffer, privateKey: Buffer) => void): void;
-    function generateKeyPair(type: 'rsa', options: RSAKeyPairKeyObjectOptions, callback: (err: Error | null, publicKey: KeyObject, privateKey: KeyObject) => void): void;
+    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'pem'> & RSAKeyPairOptionsEncodingPrivateKey<'pem'>, callback: (err: Error | null, publicKey: string, privateKey: string) => void): void;
+    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'pem'> & RSAKeyPairOptionsEncodingPrivateKey<'der'>, callback: (err: Error | null, publicKey: string, privateKey: Buffer) => void): void;
+    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'pem'>, callback: (err: Error | null, publicKey: string, privateKey: KeyObject) => void): void;
+    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'der'> & RSAKeyPairOptionsEncodingPrivateKey<'pem'>, callback: (err: Error | null, publicKey: Buffer, privateKey: string) => void): void;
+    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'der'> & RSAKeyPairOptionsEncodingPrivateKey<'der'>, callback: (err: Error | null, publicKey: Buffer, privateKey: Buffer) => void): void;
+    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptionsEncodingPublicKey<'der'>, callback: (err: Error | null, publicKey: Buffer, privateKey: KeyObject) => void): void;
+    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptionsEncodingPrivateKey<'pem'>, callback: (err: Error | null, publicKey: KeyObject, privateKey: string) => void): void;
+    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptionsEncodingPrivateKey<'der'>, callback: (err: Error | null, publicKey: KeyObject, privateKey: Buffer) => void): void;
+    function generateKeyPair(type: 'rsa', options: RSAKeyPairOptions, callback: (err: Error | null, publicKey: KeyObject, privateKey: KeyObject) => void): void;
 
-    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptions<'pem', 'pem'>, callback: (err: Error | null, publicKey: string, privateKey: string) => void): void;
-    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptions<'pem', 'der'>, callback: (err: Error | null, publicKey: string, privateKey: Buffer) => void): void;
-    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptions<'der', 'pem'>, callback: (err: Error | null, publicKey: Buffer, privateKey: string) => void): void;
-    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptions<'der', 'der'>, callback: (err: Error | null, publicKey: Buffer, privateKey: Buffer) => void): void;
-    function generateKeyPair(type: 'dsa', options: DSAKeyPairKeyObjectOptions, callback: (err: Error | null, publicKey: KeyObject, privateKey: KeyObject) => void): void;
+    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'pem'> & DSAKeyPairOptionsEncodingPrivateKey<'pem'>, callback: (err: Error | null, publicKey: string, privateKey: string) => void): void;
+    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'pem'> & DSAKeyPairOptionsEncodingPrivateKey<'der'>, callback: (err: Error | null, publicKey: string, privateKey: Buffer) => void): void;
+    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'pem'>, callback: (err: Error | null, publicKey: string, privateKey: KeyObject) => void): void;
+    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'der'> & DSAKeyPairOptionsEncodingPrivateKey<'pem'>, callback: (err: Error | null, publicKey: Buffer, privateKey: string) => void): void;
+    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'der'> & DSAKeyPairOptionsEncodingPrivateKey<'der'>, callback: (err: Error | null, publicKey: Buffer, privateKey: Buffer) => void): void;
+    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptionsEncodingPublicKey<'der'>, callback: (err: Error | null, publicKey: Buffer, privateKey: KeyObject) => void): void;
+    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptionsEncodingPrivateKey<'pem'>, callback: (err: Error | null, publicKey: KeyObject, privateKey: string) => void): void;
+    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptionsEncodingPrivateKey<'der'>, callback: (err: Error | null, publicKey: KeyObject, privateKey: Buffer) => void): void;
+    function generateKeyPair(type: 'dsa', options: DSAKeyPairOptions, callback: (err: Error | null, publicKey: KeyObject, privateKey: KeyObject) => void): void;
 
-    function generateKeyPair(type: 'ec', options: ECKeyPairOptions<'pem', 'pem'>, callback: (err: Error | null, publicKey: string, privateKey: string) => void): void;
-    function generateKeyPair(type: 'ec', options: ECKeyPairOptions<'pem', 'der'>, callback: (err: Error | null, publicKey: string, privateKey: Buffer) => void): void;
-    function generateKeyPair(type: 'ec', options: ECKeyPairOptions<'der', 'pem'>, callback: (err: Error | null, publicKey: Buffer, privateKey: string) => void): void;
-    function generateKeyPair(type: 'ec', options: ECKeyPairOptions<'der', 'der'>, callback: (err: Error | null, publicKey: Buffer, privateKey: Buffer) => void): void;
-    function generateKeyPair(type: 'ec', options: ECKeyPairKeyObjectOptions, callback: (err: Error | null, publicKey: KeyObject, privateKey: KeyObject) => void): void;
+    function generateKeyPair(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'pem'> & ECKeyPairOptionsEncodingPrivateKey<'pem'>, callback: (err: Error | null, publicKey: string, privateKey: string) => void): void;
+    function generateKeyPair(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'pem'> & ECKeyPairOptionsEncodingPrivateKey<'der'>, callback: (err: Error | null, publicKey: string, privateKey: Buffer) => void): void;
+    function generateKeyPair(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'pem'>, callback: (err: Error | null, publicKey: string, privateKey: KeyObject) => void): void;
+    function generateKeyPair(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'der'> & ECKeyPairOptionsEncodingPrivateKey<'pem'>, callback: (err: Error | null, publicKey: Buffer, privateKey: string) => void): void;
+    function generateKeyPair(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'der'> & ECKeyPairOptionsEncodingPrivateKey<'der'>, callback: (err: Error | null, publicKey: Buffer, privateKey: Buffer) => void): void;
+    function generateKeyPair(type: 'ec', options: ECKeyPairOptionsEncodingPublicKey<'der'>, callback: (err: Error | null, publicKey: Buffer, privateKey: KeyObject) => void): void;
+    function generateKeyPair(type: 'ec', options: ECKeyPairOptionsEncodingPrivateKey<'pem'>, callback: (err: Error | null, publicKey: KeyObject, privateKey: string) => void): void;
+    function generateKeyPair(type: 'ec', options: ECKeyPairOptionsEncodingPrivateKey<'der'>, callback: (err: Error | null, publicKey: KeyObject, privateKey: Buffer) => void): void;
+    function generateKeyPair(type: 'ec', options: ECKeyPairOptions, callback: (err: Error | null, publicKey: KeyObject, privateKey: KeyObject) => void): void;
 
     namespace generateKeyPair {
-        function __promisify__(type: "rsa", options: RSAKeyPairOptions<'pem', 'pem'>): Promise<{ publicKey: string, privateKey: string }>;
-        function __promisify__(type: "rsa", options: RSAKeyPairOptions<'pem', 'der'>): Promise<{ publicKey: string, privateKey: Buffer }>;
-        function __promisify__(type: "rsa", options: RSAKeyPairOptions<'der', 'pem'>): Promise<{ publicKey: Buffer, privateKey: string }>;
-        function __promisify__(type: "rsa", options: RSAKeyPairOptions<'der', 'der'>): Promise<{ publicKey: Buffer, privateKey: Buffer }>;
-        function __promisify__(type: "rsa", options: RSAKeyPairKeyObjectOptions): Promise<KeyPairKeyObjectResult>;
+        function __promisify__(type: "rsa", options: RSAKeyPairOptionsEncodingPublicKey<'pem'> & RSAKeyPairOptionsEncodingPrivateKey<'pem'>): Promise<{ publicKey: string, privateKey: string }>;
+        function __promisify__(type: "rsa", options: RSAKeyPairOptionsEncodingPublicKey<'pem'> & RSAKeyPairOptionsEncodingPrivateKey<'der'>): Promise<{ publicKey: string, privateKey: Buffer }>;
+        function __promisify__(type: "rsa", options: RSAKeyPairOptionsEncodingPublicKey<'pem'>): Promise<{ publicKey: string, privateKey: KeyObject }>;
+        function __promisify__(type: "rsa", options: RSAKeyPairOptionsEncodingPublicKey<'der'> & RSAKeyPairOptionsEncodingPrivateKey<'pem'>): Promise<{ publicKey: Buffer, privateKey: string }>;
+        function __promisify__(type: "rsa", options: RSAKeyPairOptionsEncodingPublicKey<'der'> & RSAKeyPairOptionsEncodingPrivateKey<'der'>): Promise<{ publicKey: Buffer, privateKey: Buffer }>;
+        function __promisify__(type: "rsa", options: RSAKeyPairOptionsEncodingPublicKey<'der'>): Promise<{ publicKey: Buffer, privateKey: KeyObject }>;
+        function __promisify__(type: "rsa", options: RSAKeyPairOptionsEncodingPrivateKey<'pem'>): Promise<{ publicKey: KeyObject, privateKey: string }>;
+        function __promisify__(type: "rsa", options: RSAKeyPairOptionsEncodingPrivateKey<'der'>): Promise<{ publicKey: KeyObject, privateKey: Buffer }>;
+        function __promisify__(type: "rsa", options: RSAKeyPairOptions): Promise<{ publicKey: KeyObject, privateKey: KeyObject }>;
 
-        function __promisify__(type: "dsa", options: DSAKeyPairOptions<'pem', 'pem'>): Promise<{ publicKey: string, privateKey: string }>;
-        function __promisify__(type: "dsa", options: DSAKeyPairOptions<'pem', 'der'>): Promise<{ publicKey: string, privateKey: Buffer }>;
-        function __promisify__(type: "dsa", options: DSAKeyPairOptions<'der', 'pem'>): Promise<{ publicKey: Buffer, privateKey: string }>;
-        function __promisify__(type: "dsa", options: DSAKeyPairOptions<'der', 'der'>): Promise<{ publicKey: Buffer, privateKey: Buffer }>;
-        function __promisify__(type: "dsa", options: DSAKeyPairKeyObjectOptions): Promise<KeyPairKeyObjectResult>;
+        function __promisify__(type: "dsa", options: DSAKeyPairOptionsEncodingPublicKey<'pem'> & DSAKeyPairOptionsEncodingPrivateKey<'pem'>): Promise<{ publicKey: string, privateKey: string }>;
+        function __promisify__(type: "dsa", options: DSAKeyPairOptionsEncodingPublicKey<'pem'> & DSAKeyPairOptionsEncodingPrivateKey<'der'>): Promise<{ publicKey: string, privateKey: Buffer }>;
+        function __promisify__(type: "dsa", options: DSAKeyPairOptionsEncodingPublicKey<'pem'>): Promise<{ publicKey: string, privateKey: KeyObject }>;
+        function __promisify__(type: "dsa", options: DSAKeyPairOptionsEncodingPublicKey<'der'> & DSAKeyPairOptionsEncodingPrivateKey<'pem'>): Promise<{ publicKey: Buffer, privateKey: string }>;
+        function __promisify__(type: "dsa", options: DSAKeyPairOptionsEncodingPublicKey<'der'> & DSAKeyPairOptionsEncodingPrivateKey<'der'>): Promise<{ publicKey: Buffer, privateKey: Buffer }>;
+        function __promisify__(type: "dsa", options: DSAKeyPairOptionsEncodingPublicKey<'der'>): Promise<{ publicKey: Buffer, privateKey: KeyObject }>;
+        function __promisify__(type: "dsa", options: DSAKeyPairOptionsEncodingPrivateKey<'pem'>): Promise<{ publicKey: KeyObject, privateKey: string }>;
+        function __promisify__(type: "dsa", options: DSAKeyPairOptionsEncodingPrivateKey<'der'>): Promise<{ publicKey: KeyObject, privateKey: Buffer }>;
+        function __promisify__(type: "dsa", options: DSAKeyPairOptions): Promise<{ publicKey: KeyObject, privateKey: KeyObject }>;
 
-        function __promisify__(type: "ec", options: ECKeyPairOptions<'pem', 'pem'>): Promise<{ publicKey: string, privateKey: string }>;
-        function __promisify__(type: "ec", options: ECKeyPairOptions<'pem', 'der'>): Promise<{ publicKey: string, privateKey: Buffer }>;
-        function __promisify__(type: "ec", options: ECKeyPairOptions<'der', 'pem'>): Promise<{ publicKey: Buffer, privateKey: string }>;
-        function __promisify__(type: "ec", options: ECKeyPairOptions<'der', 'der'>): Promise<{ publicKey: Buffer, privateKey: Buffer }>;
-        function __promisify__(type: "ec", options: ECKeyPairKeyObjectOptions): Promise<KeyPairKeyObjectResult>;
+        function __promisify__(type: "ec", options: ECKeyPairOptionsEncodingPublicKey<'pem'> & ECKeyPairOptionsEncodingPrivateKey<'pem'>): Promise<{ publicKey: string, privateKey: string }>;
+        function __promisify__(type: "ec", options: ECKeyPairOptionsEncodingPublicKey<'pem'> & ECKeyPairOptionsEncodingPrivateKey<'der'>): Promise<{ publicKey: string, privateKey: Buffer }>;
+        function __promisify__(type: "ec", options: ECKeyPairOptionsEncodingPublicKey<'pem'>): Promise<{ publicKey: string, privateKey: KeyObject }>;
+        function __promisify__(type: "ec", options: ECKeyPairOptionsEncodingPublicKey<'der'> & ECKeyPairOptionsEncodingPrivateKey<'pem'>): Promise<{ publicKey: Buffer, privateKey: string }>;
+        function __promisify__(type: "ec", options: ECKeyPairOptionsEncodingPublicKey<'der'> & ECKeyPairOptionsEncodingPrivateKey<'der'>): Promise<{ publicKey: Buffer, privateKey: Buffer }>;
+        function __promisify__(type: "ec", options: ECKeyPairOptionsEncodingPublicKey<'der'>): Promise<{ publicKey: Buffer, privateKey: KeyObject }>;
+        function __promisify__(type: "ec", options: ECKeyPairOptionsEncodingPrivateKey<'pem'>): Promise<{ publicKey: KeyObject, privateKey: string }>;
+        function __promisify__(type: "ec", options: ECKeyPairOptionsEncodingPrivateKey<'der'>): Promise<{ publicKey: KeyObject, privateKey: Buffer }>;
+        function __promisify__(type: "ec", options: ECKeyPairOptions): Promise<{ publicKey: KeyObject, privateKey: KeyObject }>;
     }
 }
